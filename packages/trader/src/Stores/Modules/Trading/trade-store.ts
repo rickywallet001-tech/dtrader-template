@@ -1169,6 +1169,26 @@ export default class TradeStore extends BaseStore {
         is_dtrader_v2?: boolean
     ) {
         if (!this.is_purchase_enabled) return;
+
+        // Stopgap safety net: block the purchase client-side if the stake
+        // exceeds the current known balance. The server/broker should be
+        // the ultimate authority on this, but this guard prevents it from
+        // happening through the normal app flow regardless.
+        const current_balance = Number(this.root_store.client.balance);
+        const stake_amount = Number(price);
+        if (!Number.isNaN(current_balance) && !Number.isNaN(stake_amount) && stake_amount > current_balance) {
+            this.disablePurchaseButtons();
+            this.root_store.common.setServicesError(
+                {
+                    type: 'buy',
+                    code: 'InsufficientBalance',
+                    message: localize('Insufficient balance. Please top up your account or lower your stake.'),
+                },
+                is_dtrader_v2
+            );
+            return;
+        }
+
         if (proposal_id) {
             runInAction(() => {
                 this.is_purchase_enabled = false;
