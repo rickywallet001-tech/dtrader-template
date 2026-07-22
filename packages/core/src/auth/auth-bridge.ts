@@ -50,9 +50,14 @@ function applyAuth(data: { token: string; loginid?: string; accounts?: IncomingA
         localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accountsMap));
     }
 
-    // 3) What getActiveLoginIDFromLocalStorage() actually reads
+    // 3) What getActiveLoginIDFromLocalStorage() actually reads.
+    // client-store's init() checks sessionStorage's active_loginid FIRST,
+    // before localStorage — so it must be set here too, or a stale entry
+    // from an earlier boot in this same tab (e.g. an unauthenticated
+    // default) will keep winning on every reload and shadow this value.
     const activeLoginid = data.loginid || accountsList[0]?.account;
     if (activeLoginid) {
+        sessionStorage.setItem(ACTIVE_LOGINID_KEY, activeLoginid);
         localStorage.setItem(ACTIVE_LOGINID_KEY, activeLoginid);
     }
 
@@ -78,6 +83,7 @@ export function initAuthBridge(): void {
         if (data?.type === 'AUTH_LOGOUT') {
             sessionStorage.removeItem(AUTH_INFO_KEY);
             sessionStorage.removeItem('tradexpro_auth_applied');
+            sessionStorage.removeItem(ACTIVE_LOGINID_KEY);
             localStorage.removeItem(ACCOUNTS_KEY);
             localStorage.removeItem(ACTIVE_LOGINID_KEY);
             window.location.reload();
