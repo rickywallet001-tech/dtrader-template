@@ -334,6 +334,7 @@ export default class ClientStore extends BaseStore {
                 const accounts = await fetchAccounts();
                 const active_account =
                     accounts.find(a => a.account_id === sessionStorage.getItem('active_loginid')) ||
+                    accounts.find(a => a.account_id === localStorage.getItem('active_loginid')) ||
                     accounts.find(a => a.account_type === 'demo') ||
                     accounts[0];
 
