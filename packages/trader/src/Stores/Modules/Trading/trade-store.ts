@@ -1184,7 +1184,7 @@ export default class TradeStore extends BaseStore {
                     code: 'InsufficientBalance',
                     message: localize('Insufficient balance. Please top up your account or lower your stake.'),
                 },
-                is_dtrader_v2
+                is_dtrader_v2 ?? false
             );
             return;
         }
