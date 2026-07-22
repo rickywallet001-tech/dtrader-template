@@ -2,11 +2,9 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    width: calc(100vw - var(--sidebar-width, 7.2rem));
+    width: calc(100vw - 7.2rem);
     padding-left: 0;
-    transition:
-        padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        width 0.25s ease;
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
 
     @include mobile-screen {
@@ -58,7 +56,7 @@
         }
 
         .trade__trade-types {
-            width: calc(100vw - var(--sidebar-width, 7.2rem) - 10rem);
+            width: calc(100vw - 7.2rem - 10rem);
         }
     }
     &__grid {
@@ -70,7 +68,7 @@
 
     &__trade-types {
         position: relative;
-        width: calc(100vw - var(--sidebar-width, 7.2rem) - 28rem);
+        width: calc(100vw - 7.2rem - 28rem);
         padding-right: 5.6rem;
         background-color: var(--semantic-color-slate-solid-surface-frame-low);
         display: flex;
