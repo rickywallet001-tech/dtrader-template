@@ -62,6 +62,19 @@ const BinarySocketGeneral = (() => {
                         // Subsequent balance updates — just update the balance
                         ResponseHandlers.balanceActiveAccount(response);
                     }
+                    // Broadcast live balance up to the parent shell so its
+                    // navbar never drifts from this iframe's own WS session.
+                    if (window.parent !== window) {
+                        window.parent.postMessage(
+                            {
+                                type: 'BALANCE_UPDATE',
+                                balance: response.balance.balance,
+                                currency: response.balance.currency,
+                                loginid: response.balance.loginid,
+                            },
+                            'https://tradexpro.co.ke'
+                        );
+                    }
                 }
                 break;
             // no default
