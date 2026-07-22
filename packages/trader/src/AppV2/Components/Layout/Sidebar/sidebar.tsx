@@ -7,6 +7,8 @@ import { Button, Flyout, Text } from '@deriv/components';
 import {
     LabelPairedLifeRingSmRegularIcon,
     LegacyHomeNewIcon,
+    StandaloneChevronLeftRegularIcon,
+    StandaloneChevronRightRegularIcon,
     StandaloneCircleUserFillIcon,
     StandaloneCircleUserRegularIcon,
     StandaloneClockThreeFillIcon,
@@ -56,6 +58,21 @@ const Sidebar = observer(() => {
     const history = useHistory();
     const sidebar_ref = React.useRef<HTMLElement>(null);
     const { sendBridgeEvent } = useMobileBridge();
+
+    // Collapsed by default so the icon rail doesn't permanently eat into the
+    // trade page's width — it only takes up space when the user opens it via
+    // the toggle tab. --sidebar-width is read by trade.scss's width calc()s
+    // so the chart/trade-types area reclaims the space while collapsed.
+    const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(false);
+
+    React.useEffect(() => {
+        document.documentElement.style.setProperty('--sidebar-width', isSidebarExpanded ? '7.2rem' : '0rem');
+        return () => {
+            document.documentElement.style.removeProperty('--sidebar-width');
+        };
+    }, [isSidebarExpanded]);
+
+    const toggleSidebarExpanded = () => setIsSidebarExpanded(prev => !prev);
 
     React.useEffect(() => {
         onMount();
@@ -230,10 +247,29 @@ const Sidebar = observer(() => {
 
     return (
         <React.Fragment>
+            {isActiveRoute(routes.index) && (
+                <button
+                    type='button'
+                    className={classNames('sidebar-toggle', {
+                        'sidebar-toggle--expanded': isSidebarExpanded,
+                    })}
+                    onClick={toggleSidebarExpanded}
+                    aria-label={isSidebarExpanded ? localize('Collapse sidebar') : localize('Expand sidebar')}
+                    aria-expanded={isSidebarExpanded}
+                    data-testid='dt_sidebar_toggle'
+                >
+                    {isSidebarExpanded ? (
+                        <StandaloneChevronLeftRegularIcon fill='var(--color-text-primary)' iconSize='xs' />
+                    ) : (
+                        <StandaloneChevronRightRegularIcon fill='var(--color-text-primary)' iconSize='xs' />
+                    )}
+                </button>
+            )}
             <aside
                 ref={sidebar_ref}
                 className={classNames('sidebar', {
                     sidebar__hidden: !isActiveRoute(routes.index),
+                    'sidebar--collapsed': !isSidebarExpanded,
                 })}
                 data-testid='dt_sidebar'
             >

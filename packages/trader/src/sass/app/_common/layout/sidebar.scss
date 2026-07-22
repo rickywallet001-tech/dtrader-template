@@ -1,15 +1,19 @@
 /** @define sidebar */
 .sidebar {
     height: 100vh;
-    width: 7.2rem;
-    min-width: 7.2rem;
+    width: var(--sidebar-width, 7.2rem);
+    min-width: var(--sidebar-width, 7.2rem);
     z-index: 100;
     display: flex;
     flex-direction: column;
     background-color: var(--color-nav-bg);
     border-right: 1px solid var(--color-nav-border);
-    transition: opacity 0.3s;
+    transition:
+        opacity 0.3s,
+        width 0.25s ease,
+        min-width 0.25s ease;
     backface-visibility: hidden;
+    overflow: hidden;
 
     @include mobile-screen {
         display: none; // Hide sidebar on mobile
@@ -18,6 +22,15 @@
     &--highlighted {
         z-index: 10001;
         position: relative;
+    }
+
+    &--collapsed {
+        border-right-color: transparent;
+
+        .sidebar__item-label,
+        .sidebar__item-badge {
+            opacity: 0;
+        }
     }
 
     &__header {
@@ -129,5 +142,36 @@
 
     &__hidden {
         display: none;
+    }
+}
+
+// Small always-visible handle on the trade page that expands/collapses
+// the icon rail above. Fixed-positioned so it never consumes flex layout
+// width, and mobile hides it the same way it hides the sidebar itself.
+.sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 101;
+    width: 1.6rem;
+    height: 4.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--color-nav-border);
+    border-left: none;
+    border-radius: 0 0.8rem 0.8rem 0;
+    background-color: var(--color-nav-bg);
+    cursor: pointer;
+    transition: left 0.25s ease;
+
+    @include mobile-screen {
+        display: none;
+    }
+
+    &--expanded {
+        left: var(--sidebar-width, 7.2rem);
     }
 }
