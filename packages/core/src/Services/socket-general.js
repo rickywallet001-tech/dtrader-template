@@ -186,10 +186,16 @@ const ResponseHandlers = (() => {
     const balanceActiveAccount = response => {
         if (!response.error) {
             const balance = response.balance?.balance || response.balance;
+            // Use the server's own loginid for this balance, not the client's
+            // currently-assumed active loginid. Tagging with the client's
+            // assumption defeats setBalanceActiveAccount's mismatch guard
+            // (it would always match itself), letting a stale/wrong account's
+            // balance silently get applied under the wrong account's label.
+            const loginid = response.balance?.loginid || client_store?.loginid;
             if (balance !== undefined && balance !== null && balance !== '') {
                 BinarySocketGeneral.setBalanceActiveAccount({
                     balance,
-                    loginid: client_store?.loginid,
+                    loginid,
                 });
             }
         }
