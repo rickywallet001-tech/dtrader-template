@@ -1176,6 +1176,13 @@ export default class TradeStore extends BaseStore {
         // happening through the normal app flow regardless.
         const current_balance = Number(this.root_store.client.balance);
         const stake_amount = Number(price);
+        // eslint-disable-next-line no-console
+        console.warn('[BalanceGuard]', {
+            raw_client_balance: this.root_store.client.balance,
+            current_balance,
+            stake_amount,
+            loginid: this.root_store.client.loginid,
+        });
         if (!Number.isNaN(current_balance) && !Number.isNaN(stake_amount) && stake_amount > current_balance) {
             this.disablePurchaseButtons();
             this.root_store.common.setServicesError(
