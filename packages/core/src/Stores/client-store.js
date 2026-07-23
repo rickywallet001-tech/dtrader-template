@@ -577,6 +577,19 @@ export default class ClientStore extends BaseStore {
     async switchAccount(account_id) {
         if (!account_id || this.loginid === account_id) return;
 
+        // Clear the outgoing account's balance immediately, before anything
+        // else. `balance` is a computed getter reading current_account.balance
+        // - without this, it keeps returning the PREVIOUS account's real
+        // (non-NaN) balance for the entire switch, so a purchase guard
+        // checking Number.isNaN(balance) would never catch a Buy click that
+        // lands in this window; it would just silently use the wrong
+        // account's number. Forcing it to undefined here makes client.balance
+        // correctly report "unknown" until setBalanceActiveAccount sets a
+        // real value for the newly-active account.
+        if (this.current_account) {
+            this.current_account.balance = undefined;
+        }
+
         // Track the newly active account for multi-tab sync
         localStorage.setItem('active_loginid', account_id);
         sessionStorage.setItem('active_loginid', account_id);

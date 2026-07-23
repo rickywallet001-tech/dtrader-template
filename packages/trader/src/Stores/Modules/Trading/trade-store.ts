@@ -1170,10 +1170,14 @@ export default class TradeStore extends BaseStore {
     ) {
         if (!this.is_purchase_enabled) return;
 
-        // Stopgap safety net: block the purchase client-side if the stake
-        // exceeds the current known balance. The server/broker should be
-        // the ultimate authority on this, but this guard prevents it from
-        // happening through the normal app flow regardless.
+        // Stopgap safety net: block the purchase client-side unless we have
+        // a *known, current* balance that actually covers the stake. Fails
+        // closed: if balance hasn't loaded yet for the active account
+        // (client.balance is undefined -> current_balance is NaN), that is
+        // treated as "cannot verify -> block", not "unknown -> allow". The
+        // previous version of this guard did the opposite (skipped
+        // enforcement whenever current_balance was NaN), which is the most
+        // likely reason it was inconsistently bypassed.
         const current_balance = Number(this.root_store.client.balance);
         const stake_amount = Number(price);
         // eslint-disable-next-line no-console
@@ -1183,13 +1187,18 @@ export default class TradeStore extends BaseStore {
             stake_amount,
             loginid: this.root_store.client.loginid,
         });
-        if (!Number.isNaN(current_balance) && !Number.isNaN(stake_amount) && stake_amount > current_balance) {
+        const balance_unknown = Number.isNaN(current_balance);
+        const stake_invalid = Number.isNaN(stake_amount);
+        const insufficient = !balance_unknown && !stake_invalid && stake_amount > current_balance;
+        if (balance_unknown || stake_invalid || insufficient) {
             this.disablePurchaseButtons();
             this.root_store.common.setServicesError(
                 {
                     type: 'buy',
                     code: 'InsufficientBalance',
-                    message: localize('Insufficient balance. Please top up your account or lower your stake.'),
+                    message: balance_unknown
+                        ? localize('Unable to verify your balance yet. Please wait a moment and try again.')
+                        : localize('Insufficient balance. Please top up your account or lower your stake.'),
                 },
                 is_dtrader_v2 ?? false
             );
