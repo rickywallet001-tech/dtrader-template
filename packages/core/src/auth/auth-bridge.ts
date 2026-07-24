@@ -24,6 +24,10 @@ type IncomingAccount = { account: string; token: string; currency?: string };
 function applyAuth(data: { token: string; loginid?: string; accounts?: IncomingAccount[] }): void {
     if (!data.token) return;
 
+    // Capture this BEFORE any writes below — it's what decides whether we
+    // actually need to reload.
+    const previousLoginid = sessionStorage.getItem(ACTIVE_LOGINID_KEY);
+
     // 1) What getStoredToken() actually reads
     sessionStorage.setItem(
         AUTH_INFO_KEY,
@@ -62,9 +66,16 @@ function applyAuth(data: { token: string; loginid?: string; accounts?: IncomingA
     }
 
     // client-store reads these synchronously on app boot, not reactively —
-    // reload once so the app initializes already authenticated.
-    if (!sessionStorage.getItem('tradexpro_auth_applied')) {
-        sessionStorage.setItem('tradexpro_auth_applied', '1');
+    // so a reload is the only way the already-running app picks up a
+    // change. Reload whenever the active account actually differs from
+    // what was last applied (covers first login AND every subsequent
+    // Demo<->Real switch on the parent site). A flat one-time flag here
+    // previously meant only the very first TRADEXPRO_AUTH message ever
+    // triggered a reload — every account switch after that silently wrote
+    // the new loginid to storage but left the running app on whichever
+    // account was active at first boot, trading real/demo funds that
+    // didn't match what the parent site displayed.
+    if (activeLoginid && activeLoginid !== previousLoginid) {
         window.location.reload();
     }
 }
