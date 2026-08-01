@@ -7,6 +7,18 @@
     transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
 
+    // TradeX brand-blue accent, scoped to this page only. These are the
+    // same custom-property names @deriv-com/quill-ui's own components read
+    // for their selected/focus states -- overriding them here (rather than
+    // touching the vendored package) re-colors chips, growth-rate pills,
+    // and input focus rings to TradeX blue without risking the underlying
+    // component logic. Buy/win/loss colors are left untouched deliberately
+    // -- green-for-buy is a trading-UX convention, not a brand color.
+    --component-chip-bg-selected: #1e6fd9;
+    --component-chip-text-selected: #ffffff;
+    --core-color-solid-blue-700: #1e6fd9;
+    --core-color-solid-blue-600: #1e6fd9;
+
     @include mobile-screen {
         height: unset;
         width: unset;
@@ -61,9 +73,12 @@
     }
     &__grid {
         display: grid;
-        grid-template-columns: 1fr minmax(0, 28rem);
+        grid-template-columns: 1fr minmax(0, 30rem);
+        gap: var(--core-spacing-200);
+        padding: var(--core-spacing-200);
         position: relative;
         height: calc(100vh - 6.4rem);
+        box-sizing: border-box;
     }
 
     &__trade-types {
@@ -121,6 +136,7 @@
         direction: ltr;
         overflow: hidden;
         touch-action: none;
+        border-radius: var(--core-borderRadius-400);
 
         @include mobile-screen {
             border-top-left-radius: var(--core-borderRadius-400);
@@ -157,6 +173,7 @@
     &__parameter {
         min-height: 7.2rem;
         background-color: var(--semantic-color-slate-solid-surface-frame-low);
+        border-radius: var(--core-borderRadius-400);
 
         &:has(.trade-params__options__wrapper--horizontal:not(:only-child)) {
             min-height: 10.4rem;

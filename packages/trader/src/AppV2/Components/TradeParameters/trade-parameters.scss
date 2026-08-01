@@ -1,6 +1,8 @@
 .trade-params {
     background-color: var(--semantic-color-slate-solid-surface-frame-low);
     border-radius: var(--core-borderRadius-400);
+    border: 1px solid var(--semantic-color-monochrome-border-normal-mid);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     gap: var(--core-spacing-800);
@@ -11,6 +13,8 @@
 
     @include mobile-screen {
         background-color: unset;
+        border: unset;
+        box-shadow: unset;
         padding: unset;
         gap: unset;
     }
