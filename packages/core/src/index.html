@@ -110,7 +110,19 @@
                 var antiClickjack = document.getElementById('antiClickjack');
                 antiClickjack.parentNode.removeChild(antiClickjack);
             } else {
-                top.location = self.location;
+                // document.referrer can legitimately be empty even for a genuinely
+                // trusted embed (privacy-conscious browsers, mobile referrer
+                // stripping, etc.), which sends us down this branch as a false
+                // negative. When that happens inside our own sandboxed iframe
+                // (allow-top-navigation is intentionally not set), this throws
+                // an uncaught SecurityError that can abort whatever else was
+                // running during boot -- wrapped so a blocked attempt fails
+                // silently instead of potentially corrupting the rest of init.
+                try {
+                    top.location = self.location;
+                } catch (navError) {
+                    // Blocked as expected when sandboxed without allow-top-navigation.
+                }
             }
         </script>
         <!-- End Anti-Clickjack -->

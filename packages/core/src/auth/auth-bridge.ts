@@ -80,9 +80,29 @@ function applyAuth(data: { token: string; loginid?: string; accounts?: IncomingA
     }
 }
 
+/**
+ * document.referrer (checked once, synchronously, before this module even
+ * loads -- see index.html's inline anti-clickjack script) can legitimately
+ * come back empty for a genuinely trusted embed in privacy-conscious
+ * browsers or on mobile, which reads as "untrusted" and leaves the page
+ * permanently hidden (body { display: none }) even though we ARE embedded
+ * by the real parent. event.origin on a message event is browser-guaranteed
+ * and can't be similarly stripped, so receiving anything at all from our
+ * real parent origin is proof enough to reveal the page if that initial
+ * check produced a false negative.
+ */
+function confirmTrustedEmbed(): void {
+    if (window.self === window.top) return;
+    document.documentElement.classList.add('tradexpro-embed');
+    const antiClickjack = document.getElementById('antiClickjack');
+    if (antiClickjack) antiClickjack.parentNode?.removeChild(antiClickjack);
+}
+
 export function initAuthBridge(): void {
     window.addEventListener('message', (event: MessageEvent) => {
         if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
+
+        confirmTrustedEmbed();
 
         const data = event.data as { type?: string } & Parameters<typeof applyAuth>[0];
 
