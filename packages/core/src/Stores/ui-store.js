@@ -1,6 +1,6 @@
 import { action, autorun, computed, makeObservable, observable } from 'mobx';
 
-import { isMobile, isTouchDevice } from '@deriv/shared';
+import { isTouchDevice } from '@deriv/shared';
 
 import { MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH } from 'Constants/ui';
 
@@ -22,7 +22,7 @@ export default class UIStore extends BaseStore {
     settings_extension = undefined;
     notification_messages_ui = undefined;
 
-    is_dark_mode_on = window?.matchMedia?.('(prefers-color-scheme: dark)').matches && isMobile();
+    is_dark_mode_on = true;
     is_settings_modal_on = false;
     is_mobile_language_menu_open = false;
 
