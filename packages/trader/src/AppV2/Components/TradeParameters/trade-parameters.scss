@@ -71,6 +71,18 @@
             .trade-params__container-handle-bar {
                 transform: rotate(180deg);
             }
+
+            .trade-params__container-content {
+                // Leaves room for whatever sits above the sheet (header,
+                // trade-type tabs, market selector, chart) plus the bottom
+                // nav reservation already baked into `bottom` above.
+                // Without this, the sheet had no height constraint at all
+                // and expanded content beyond the visible sheet area was
+                // simply unreachable - not scrollable, just cut off.
+                max-height: calc(100vh - 5.6rem - 8rem);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
     }
 
