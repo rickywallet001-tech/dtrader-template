@@ -43,13 +43,21 @@ export const getChartHeight = ({
     is_accumulator: boolean;
     symbol: string;
 }) => {
+    // When embedded in the TradeX PRO shell, the dtrader header and mobile
+    // bottom nav are hidden via CSS. getChartHeight() still subtracts their
+    // pixel values from window.innerHeight, leaving a dead gap above the chart
+    // exactly equal to HEADER + BOTTOM_NAV (112px). Detect the embed and skip
+    // those two deductions. Desktop is unaffected -- this function is only
+    // called from TradeMobile.
+    const isEmbedded = document.documentElement.classList.contains('tradexpro-embed');
+
     let height =
         window.innerHeight -
-        HEIGHT.HEADER -
         HEIGHT.TRADE_TYPE -
         HEIGHT.MARKET_SELECTOR -
         HEIGHT.TRADE_PARAM_SHEET -
-        HEIGHT.BOTTOM_NAV;
+        (isEmbedded ? 0 : HEIGHT.HEADER + HEIGHT.BOTTOM_NAV);
+
     const isVisible = (component_key: string) =>
         isTradeParamVisible({ component_key, symbol, has_cancellation, contract_type });
 
