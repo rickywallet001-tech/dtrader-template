@@ -18,6 +18,30 @@ const ALLOWED_PARENT_ORIGIN = 'https://tradexpro.co.ke';
 const AUTH_INFO_KEY = 'auth_info';
 const ACCOUNTS_KEY = 'client.accounts';
 const ACTIVE_LOGINID_KEY = 'active_loginid';
+const SESSION_MARKER_KEY = 'tradexpro_dtrader_session_active';
+
+// AUTH_INFO_KEY correctly lives in sessionStorage (cleared automatically on
+// tab/browser close). But the real per-account API tokens applyAuth() below
+// writes are duplicated into localStorage[ACCOUNTS_KEY] for multi-tab
+// awareness, and localStorage survives a browser restart or device restart.
+// A stale entry there would let this iframe silently resurrect a session
+// the person never asked to keep, even after the parent site (tradexpro.co.ke)
+// has already correctly forced a fresh login of its own. Detect a genuinely
+// new browser session the same way the parent does — via a sessionStorage
+// marker, since sessionStorage and localStorage share the same
+// close-the-tab/close-the-browser lifecycle boundary — and wipe the
+// persisted account data before anything downstream (client-store's boot
+// sequence) gets a chance to read it.
+function clearStaleAccountsOnNewBrowserSession(): void {
+    try {
+        if (sessionStorage.getItem(SESSION_MARKER_KEY)) return;
+        sessionStorage.setItem(SESSION_MARKER_KEY, '1');
+        localStorage.removeItem(ACCOUNTS_KEY);
+        localStorage.removeItem(ACTIVE_LOGINID_KEY);
+    } catch {
+        // storage unavailable - nothing to do.
+    }
+}
 
 type IncomingAccount = { account: string; token: string; currency?: string };
 
@@ -99,6 +123,8 @@ function confirmTrustedEmbed(): void {
 }
 
 export function initAuthBridge(): void {
+    clearStaleAccountsOnNewBrowserSession();
+
     window.addEventListener('message', (event: MessageEvent) => {
         if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
 
