@@ -138,7 +138,7 @@ const plugins = ({ base, is_test_env }) => {
             silent: true,
         }),
         new DefinePlugin({
-            'process.env.REF_NAME': JSON.stringify(process.env.REF_NAME),
+            'process.env.REF_NAME': JSON.stringify(process.env.REF_NAME || 'master'),
             'process.env.TRANSLATIONS_CDN_URL': JSON.stringify(process.env.TRANSLATIONS_CDN_URL || ''),
         }),
         new CleanWebpackPlugin(),
